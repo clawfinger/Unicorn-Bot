@@ -5,8 +5,6 @@
 #include "Dispatcher.h"
 #include <map>
 
-static std::string botToken("Nzk2NjcxODkzODY4MjQ5MTIw.X_bUhA.TMEzBpupvl9mZ9cxiqOCS0VZgIw");
-
 class UnicornBot : public SleepyDiscord::DiscordClient {
 public:
     using SleepyDiscord::DiscordClient::DiscordClient;

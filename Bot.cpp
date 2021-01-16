@@ -6,7 +6,7 @@ std::pair<time_t, time_t> getWeekInterval(const std::tm& timeData);
 
 UnicornBot::UnicornBot(const std::string token, const char numOfThreads): SleepyDiscord::DiscordClient(token, numOfThreads), isDBready(true), disp(db), handler(db)
 {
-    db.open("D:\\Projects\\sqliteWrapper\\build\\test.db");
+    db.open("database.db");
     int ec = db.lastResultCode();
 
     if (ec != 0) //Change magic 0 error code
@@ -31,13 +31,17 @@ void UnicornBot::onMessage(SleepyDiscord::Message message)
     {
         reply = handleHelpCommand();
     }
-    if (command == "add")
+    else if (command == "add")
     {
         reply = handleAddCommand(ss, message);
     }
-    if (command == "status")
+    else if (command == "status")
     {
         reply = handleStatusCommand(message);
+    }
+    else
+    {
+        return;
     }
     sendMessage(message.channelID, reply);
 }

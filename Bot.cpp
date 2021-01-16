@@ -15,6 +15,13 @@ UnicornBot::UnicornBot(const std::string token, const char numOfThreads): Sleepy
 
 void UnicornBot::onMessage(SleepyDiscord::Message message)
 {
+    if (message.author.bot)
+        return;
+
+    auto channel = getChannel(message.channelID);
+    if (channel.cast().type != SleepyDiscord::Channel::ChannelType::DM)
+        return;
+
     if (!isDBready)
     {
         sendMessage(message.channelID, "Database not connected! Please, contact the administrator.");

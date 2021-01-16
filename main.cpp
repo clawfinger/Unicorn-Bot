@@ -1,8 +1,6 @@
 #include "Bot.h"
 #include <fstream>
 
-static std::string botToken("Nzk2NjcxODkzODY4MjQ5MTIw.X_bUhA.TMEzBpupvl9mZ9cxiqOCS0VZgIw");
-
 int main() {
 
     std::ifstream dataFile;

@@ -94,36 +94,48 @@ std::string UnicornBot::handleStatusCommand(const SleepyDiscord::Message& messag
     std::time_t result = std::time(nullptr);
     std::tm time = *std::localtime(&result);
 
-    std::pair<time_t, time_t> week = getWeekInterval(time);
-
-    WorktimeTimeIntervalQuery query;
-    query.Username = message.author.username;
-    query.timestampFrom = week.first;
-    query.timestampTo = week.second;
-
-    std::vector<Worktime> res = handler.request(query);
-
-    std::stringstream answer;
-    int totalCU = 0;
-    std::map<std::string, int> cuForTask;
-    for (const auto& entry: res)
+    auto getWeekReport = [this, &message](const std::tm& time) -> std::string
     {
-        cuForTask[entry.Task] += entry.CU;
-    }
-    std::tm fromTime = *std::localtime(&week.first);
-    std::tm toTime = *std::localtime(&week.second);
+        std::pair<time_t, time_t> week = getWeekInterval(time);
 
-    answer << "Status on week from " << fromTime.tm_mday << "."
-    << fromTime.tm_mon + 1 << "." << fromTime.tm_year + 1900 << " to "
-    << toTime.tm_mday << "."
-    << toTime.tm_mon + 1 << "." << toTime.tm_year + 1900 << std::endl;
-    for (const auto& task: cuForTask)
-    {
-        totalCU += task.second;
-        answer << task.first << " : " << task.second << std::endl;
-    }
-    answer << "Total CU for a week: " << totalCU;
-    return answer.str();
+        WorktimeTimeIntervalQuery query;
+        query.Username = message.author.username;
+        query.timestampFrom = week.first;
+        query.timestampTo = week.second;
+
+        std::vector<Worktime> res = handler.request(query);
+
+        std::stringstream answer;
+        int totalCU = 0;
+        std::map<std::string, int> cuForTask;
+        for (const auto& entry: res)
+        {
+            cuForTask[entry.Task] += entry.CU;
+        }
+        std::tm fromTime = *std::localtime(&week.first);
+        std::tm toTime = *std::localtime(&week.second);
+
+        answer << "Status on week from " << fromTime.tm_mday << "."
+        << fromTime.tm_mon + 1 << "." << fromTime.tm_year + 1900 << " to "
+        << toTime.tm_mday << "."
+        << toTime.tm_mon + 1 << "." << toTime.tm_year + 1900 << std::endl;
+        for (const auto& task: cuForTask)
+        {
+            totalCU += task.second;
+            answer << task.first << " : " << task.second << std::endl;
+        }
+        answer << "Total CU for a week: " << totalCU << std::endl;
+        return answer.str();
+    };
+    std::string currentWeekReport = getWeekReport(time);
+
+    time.tm_mday -= 7;
+    std::time_t prevWeekTimestamp = std::mktime(&time);
+    std::tm prevWeekTime = *std::localtime(&prevWeekTimestamp);
+
+    std::string prevWeekReport = getWeekReport(prevWeekTime);
+
+    return prevWeekReport + currentWeekReport;
 }
 
 std::pair<time_t, time_t> getWeekInterval(const std::tm& timeData)
@@ -138,7 +150,7 @@ std::pair<time_t, time_t> getWeekInterval(const std::tm& timeData)
     }
     else
     {
-        daysSinceMonday = 1;
+        daysSinceMonday = 6;
         daysToSunday = 0;
     }
 
